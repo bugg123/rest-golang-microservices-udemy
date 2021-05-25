@@ -5,6 +5,8 @@ import (
 	"encoding/xml"
 	"fmt"
 	"net/http"
+
+	"github.com/bugg123/rest-golang-microservices-udemy/service"
 )
 
 func main() {
@@ -17,17 +19,14 @@ type Customer struct {
 	ZipCode string `json:"zip_code" xml:"zipcode"`
 }
 
-func greet(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello world!!!")
+type CustomerHandlers struct {
+	service service.CustomerService
 }
 
-func getAllCustomers(w http.ResponseWriter, r *http.Request) {
-	customers := []Customer{
-		{"Corey", "Morgantown", "12345"},
-		{"Caleb", "Portland", "12345"},
-	}
-	contentType := r.Header.Get("Content-Type")
+func (ch *CustomerHandlers) getAllCustomers(w http.ResponseWriter, r *http.Request) {
+	customers, _ := ch.service.GetAllCustomer()
 
+	contentType := r.Header.Get("Content-Type")
 	if contentType == "application/xml" {
 		w.Header().Add("Content-Type", "application/xml")
 		xml.NewEncoder(w).Encode(customers)
