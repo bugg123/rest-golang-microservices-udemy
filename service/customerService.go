@@ -1,10 +1,13 @@
 package service
 
-import "github.com/bugg123/rest-golang-microservices-udemy/domain"
+import (
+	"github.com/bugg123/rest-golang-microservices-udemy/domain"
+	"github.com/bugg123/rest-golang-microservices-udemy/errs"
+)
 
 type CustomerService interface {
 	GetAllCustomer() ([]domain.Customer, error)
-	GetCustomer(string) (*domain.Customer, error)
+	GetCustomer(string) (*domain.Customer, *errs.AppError)
 }
 
 type DefaultCustomerService struct {
@@ -15,7 +18,7 @@ func (d DefaultCustomerService) GetAllCustomer() ([]domain.Customer, error) {
 	return d.repo.FindAll()
 }
 
-func (d DefaultCustomerService) GetCustomer(id string) (*domain.Customer, error) {
+func (d DefaultCustomerService) GetCustomer(id string) (*domain.Customer, *errs.AppError) {
 	return d.repo.ById(id)
 }
 

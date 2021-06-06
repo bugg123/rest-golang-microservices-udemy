@@ -1,5 +1,7 @@
 package domain
 
+import "github.com/bugg123/rest-golang-microservices-udemy/errs"
+
 type Customer struct {
 	Id          string
 	Name        string
@@ -11,7 +13,7 @@ type Customer struct {
 
 type CustomerRepository interface {
 	FindAll() ([]Customer, error)
-	ById(string) (*Customer, error)
+	ById(string) (*Customer, *errs.AppError)
 }
 
 type CustomerRepositoryStub struct {
