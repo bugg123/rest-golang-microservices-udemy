@@ -3,6 +3,7 @@ package domain
 import (
 	"database/sql"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/bugg123/rest-golang-microservices-udemy/errs"
@@ -13,21 +14,21 @@ type CustomerRepositoryDb struct {
 	client *sql.DB
 }
 
-func (c CustomerRepositoryDb) FindAll() ([]Customer, error) {
+func (c CustomerRepositoryDb) FindAll() ([]Customer, *errs.AppError) {
 
 	findAllSql := "select customer_id, name, city, zipcode, date_of_birth, status from customers"
 
 	rows, err := c.client.Query(findAllSql)
 	if err != nil {
 		log.Printf("Unable to query customer table: %v", err)
-		return nil, err
+		return nil, errs.NewAppError("Unable to query customer table", http.StatusInternalServerError)
 	}
 	customers := make([]Customer, 0)
 	for rows.Next() {
 		var c Customer
 		err := rows.Scan(&c.Id, &c.Name, &c.City, &c.Zipcode, &c.DateOfBirth, &c.Status)
 		if err != nil {
-			log.Println("Error while scanning customers " + err.Error())
+			return nil, errs.NewAppError("Error while scanning customers", http.StatusInternalServerError)
 		}
 		customers = append(customers, c)
 	}

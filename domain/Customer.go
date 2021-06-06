@@ -3,16 +3,16 @@ package domain
 import "github.com/bugg123/rest-golang-microservices-udemy/errs"
 
 type Customer struct {
-	Id          string
-	Name        string
-	City        string
-	Zipcode     string
-	DateOfBirth string
-	Status      string
+	Id          string `json:"id"`
+	Name        string `json:"name"`
+	City        string `json:"city"`
+	Zipcode     string `json:"zipcode"`
+	DateOfBirth string `json:"date_of_birth"`
+	Status      string `json:"status"`
 }
 
 type CustomerRepository interface {
-	FindAll() ([]Customer, error)
+	FindAll() ([]Customer, *errs.AppError)
 	ById(string) (*Customer, *errs.AppError)
 }
 
@@ -20,7 +20,7 @@ type CustomerRepositoryStub struct {
 	customers []Customer
 }
 
-func (c CustomerRepositoryStub) FindAll() ([]Customer, error) {
+func (c CustomerRepositoryStub) FindAll() ([]Customer, *errs.AppError) {
 	return c.customers, nil
 }
 
