@@ -17,22 +17,7 @@ type CustomerRepositoryDb struct {
 func (c CustomerRepositoryDb) FindAll() ([]Customer, *errs.AppError) {
 
 	findAllSql := "select customer_id, name, city, zipcode, date_of_birth, status from customers"
-
-	rows, err := c.client.Query(findAllSql)
-	if err != nil {
-		log.Printf("Unable to query customer table: %v", err)
-		return nil, errs.NewAppError("Unable to query customer table", http.StatusInternalServerError)
-	}
-	customers := make([]Customer, 0)
-	for rows.Next() {
-		var c Customer
-		err := rows.Scan(&c.Id, &c.Name, &c.City, &c.Zipcode, &c.DateOfBirth, &c.Status)
-		if err != nil {
-			return nil, errs.NewAppError("Error while scanning customers", http.StatusInternalServerError)
-		}
-		customers = append(customers, c)
-	}
-	return customers, nil
+	return c.getCustomersByQuery(findAllSql)
 }
 
 func (d CustomerRepositoryDb) ById(id string) (*Customer, *errs.AppError) {
@@ -48,6 +33,30 @@ func (d CustomerRepositoryDb) ById(id string) (*Customer, *errs.AppError) {
 		return nil, errs.NewUnexpectedError("Unexpected database error")
 	}
 	return &c, nil
+}
+
+func (d CustomerRepositoryDb) ByStatus(status string) ([]Customer, *errs.AppError) {
+	customerSql := "select customer_id, name, city, zipcode, date_of_birth, status from customers where status = ?"
+	return d.getCustomersByQuery(customerSql, status)
+}
+
+func (d CustomerRepositoryDb) getCustomersByQuery(sqlQuery string, args ...interface{}) ([]Customer, *errs.AppError) {
+	rows, err := d.client.Query(sqlQuery, args...)
+	if err != nil {
+		log.Printf("Unable to query customer table: %v", err)
+		return nil, errs.NewAppError("Unable to query customer table", http.StatusInternalServerError)
+	}
+	customers := make([]Customer, 0)
+	for rows.Next() {
+		var c Customer
+		err := rows.Scan(&c.Id, &c.Name, &c.City, &c.Zipcode, &c.DateOfBirth, &c.Status)
+		if err != nil {
+			return nil, errs.NewAppError("Error while scanning customers", http.StatusInternalServerError)
+		}
+		customers = append(customers, c)
+	}
+	return customers, nil
+
 }
 
 func NewCustomerRepositoryDb() CustomerRepositoryDb {

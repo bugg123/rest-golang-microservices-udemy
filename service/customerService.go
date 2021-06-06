@@ -8,6 +8,7 @@ import (
 type CustomerService interface {
 	GetAllCustomer() ([]domain.Customer, *errs.AppError)
 	GetCustomer(string) (*domain.Customer, *errs.AppError)
+	GetCustomerByStatus(string) ([]domain.Customer, *errs.AppError)
 }
 
 type DefaultCustomerService struct {
@@ -16,6 +17,10 @@ type DefaultCustomerService struct {
 
 func (d DefaultCustomerService) GetAllCustomer() ([]domain.Customer, *errs.AppError) {
 	return d.repo.FindAll()
+}
+
+func (d DefaultCustomerService) GetCustomerByStatus(status string) ([]domain.Customer, *errs.AppError) {
+	return d.repo.ByStatus(status)
 }
 
 func (d DefaultCustomerService) GetCustomer(id string) (*domain.Customer, *errs.AppError) {
