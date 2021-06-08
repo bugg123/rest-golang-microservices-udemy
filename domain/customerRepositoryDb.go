@@ -2,11 +2,12 @@ package domain
 
 import (
 	"database/sql"
-	"log"
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/bugg123/rest-golang-microservices-udemy/errs"
+	"github.com/bugg123/rest-golang-microservices-udemy/logger"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -29,7 +30,7 @@ func (d CustomerRepositoryDb) ById(id string) (*Customer, *errs.AppError) {
 		if err == sql.ErrNoRows {
 			return nil, errs.NewNotFoundError("Customer not found")
 		}
-		log.Println("Error while scanning customer " + err.Error())
+		logger.Error("Error while scanning customer " + err.Error())
 		return nil, errs.NewUnexpectedError("Unexpected database error")
 	}
 	return &c, nil
@@ -43,7 +44,7 @@ func (d CustomerRepositoryDb) ByStatus(status string) ([]Customer, *errs.AppErro
 func (d CustomerRepositoryDb) getCustomersByQuery(sqlQuery string, args ...interface{}) ([]Customer, *errs.AppError) {
 	rows, err := d.client.Query(sqlQuery, args...)
 	if err != nil {
-		log.Printf("Unable to query customer table: %v", err)
+		logger.Error(fmt.Sprintf("Unable to query customer table: %v", err))
 		return nil, errs.NewAppError("Unable to query customer table", http.StatusInternalServerError)
 	}
 	customers := make([]Customer, 0)
