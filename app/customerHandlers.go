@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/bugg123/rest-golang-microservices-udemy/domain"
+	"github.com/bugg123/rest-golang-microservices-udemy/dto"
 	"github.com/bugg123/rest-golang-microservices-udemy/errs"
 	"github.com/bugg123/rest-golang-microservices-udemy/service"
 	"github.com/gorilla/mux"
@@ -20,7 +20,7 @@ type CustomerHandlers struct {
 }
 
 func (ch *CustomerHandlers) getAllCustomers(w http.ResponseWriter, r *http.Request) {
-	var customers []domain.Customer
+	var customers []dto.CustomerResponse
 	var err *errs.AppError
 	status := r.URL.Query().Get("status")
 	if status == "active" {

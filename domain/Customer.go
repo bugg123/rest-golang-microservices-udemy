@@ -1,6 +1,9 @@
 package domain
 
-import "github.com/bugg123/rest-golang-microservices-udemy/errs"
+import (
+	"github.com/bugg123/rest-golang-microservices-udemy/dto"
+	"github.com/bugg123/rest-golang-microservices-udemy/errs"
+)
 
 type Customer struct {
 	Id          string `json:"id" db:"customer_id"`
@@ -23,6 +26,27 @@ type CustomerRepositoryStub struct {
 
 func (c CustomerRepositoryStub) FindAll() ([]Customer, *errs.AppError) {
 	return c.customers, nil
+}
+
+func (c Customer) statusAsText() string {
+	statusAsText := "active"
+	if c.Status == "0" {
+		statusAsText = "inactive"
+	}
+
+	return statusAsText
+}
+
+func (c Customer) ToDto() dto.CustomerResponse {
+
+	return dto.CustomerResponse{
+		Id:          c.Id,
+		Name:        c.Name,
+		City:        c.City,
+		Zipcode:     c.Zipcode,
+		DateOfBirth: c.DateOfBirth,
+		Status:      c.statusAsText(),
+	}
 }
 
 func NewCustomerRepositoryStub() CustomerRepositoryStub {
