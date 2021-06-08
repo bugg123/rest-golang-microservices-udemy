@@ -3,16 +3,16 @@ package domain
 import (
 	"database/sql"
 	"fmt"
-	"net/http"
 	"time"
 
 	"github.com/bugg123/rest-golang-microservices-udemy/errs"
 	"github.com/bugg123/rest-golang-microservices-udemy/logger"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 )
 
 type CustomerRepositoryDb struct {
-	client *sql.DB
+	client *sqlx.DB
 }
 
 func (c CustomerRepositoryDb) FindAll() ([]Customer, *errs.AppError) {
@@ -23,9 +23,8 @@ func (c CustomerRepositoryDb) FindAll() ([]Customer, *errs.AppError) {
 
 func (d CustomerRepositoryDb) ById(id string) (*Customer, *errs.AppError) {
 	customerSql := "select customer_id, name, city, zipcode, date_of_birth, status from customers where customer_id = ?"
-	row := d.client.QueryRow(customerSql, id)
 	var c Customer
-	err := row.Scan(&c.Id, &c.Name, &c.City, &c.Zipcode, &c.DateOfBirth, &c.Status)
+	err := d.client.Get(&c, customerSql, id)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errs.NewNotFoundError("Customer not found")
@@ -42,27 +41,20 @@ func (d CustomerRepositoryDb) ByStatus(status string) ([]Customer, *errs.AppErro
 }
 
 func (d CustomerRepositoryDb) getCustomersByQuery(sqlQuery string, args ...interface{}) ([]Customer, *errs.AppError) {
-	rows, err := d.client.Query(sqlQuery, args...)
+	customers := make([]Customer, 0)
+	err := d.client.Select(&customers, sqlQuery, args...)
 	if err != nil {
 		logger.Error(fmt.Sprintf("Unable to query customer table: %v", err))
-		return nil, errs.NewAppError("Unable to query customer table", http.StatusInternalServerError)
+		return nil, errs.NewUnexpectedError("Unable to query customer table")
 	}
-	customers := make([]Customer, 0)
-	for rows.Next() {
-		var c Customer
-		err := rows.Scan(&c.Id, &c.Name, &c.City, &c.Zipcode, &c.DateOfBirth, &c.Status)
-		if err != nil {
-			return nil, errs.NewAppError("Error while scanning customers", http.StatusInternalServerError)
-		}
-		customers = append(customers, c)
-	}
+
 	return customers, nil
 
 }
 
 func NewCustomerRepositoryDb() CustomerRepositoryDb {
 
-	db, err := sql.Open("mysql", "root:codecamp@tcp(127.0.0.1:3306)/banking")
+	db, err := sqlx.Open("mysql", "root:codecamp@tcp(127.0.0.1:3306)/banking")
 	if err != nil {
 		panic(err)
 	}
