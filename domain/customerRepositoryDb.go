@@ -3,8 +3,6 @@ package domain
 import (
 	"database/sql"
 	"fmt"
-	"os"
-	"time"
 
 	"github.com/bugg123/rest-golang-microservices-udemy/errs"
 	"github.com/bugg123/rest-golang-microservices-udemy/logger"
@@ -53,21 +51,6 @@ func (d CustomerRepositoryDb) getCustomersByQuery(sqlQuery string, args ...inter
 
 }
 
-func NewCustomerRepositoryDb() CustomerRepositoryDb {
-	dbUser := os.Getenv("DB_USER")
-	dbPasswd := os.Getenv("DB_PASSWD")
-	dbAddr := os.Getenv("DB_ADDR")
-	dbPort := os.Getenv("DB_PORT")
-	dbName := os.Getenv("DB_NAME")
-
-	datasource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPasswd, dbAddr, dbPort, dbName)
-	db, err := sqlx.Open("mysql", datasource)
-	if err != nil {
-		panic(err)
-	}
-	// See "Important settings" section.
-	db.SetConnMaxLifetime(time.Minute * 3)
-	db.SetMaxOpenConns(10)
-	db.SetMaxIdleConns(10)
-	return CustomerRepositoryDb{db}
+func NewCustomerRepositoryDb(dbClient *sqlx.DB) CustomerRepositoryDb {
+	return CustomerRepositoryDb{dbClient}
 }
