@@ -2,24 +2,28 @@ package domain
 
 import (
 	"github.com/bugg123/rest-golang-microservices-udemy/dto"
-	"github.com/bugg123/rest-golang-microservices-udemy/errs"
 )
 
+const WITHDRAWAL = "withdrawal"
+
 type Transaction struct {
-	TransactionId   string
-	AccountId       string
-	CustomerId      string
-	Amount          float64
-	TransactionType string
+	TransactionId   string  `json:"transaction_id"`
+	AccountId       string  `json:"account_id"`
+	Amount          float64 `json:"amount"`
+	TransactionType string  `json:"transaction_type"`
+	TransactionDate string  `json:"transaction_date"`
 }
 
-type TransactionRepository interface {
-	Save(Transaction) (*Transaction, *Account, *errs.AppError)
+func (t Transaction) IsWithdrawal() bool {
+	return t.TransactionType == WITHDRAWAL
 }
 
-func (t Transaction) ToNewTransactionResponseDto(account *Account) dto.NewTransactionResponse {
-	return dto.NewTransactionResponse{
-		TransactionId: t.TransactionId,
-		Amount:        account.Amount,
+func (t Transaction) ToDto() dto.TransactionResponse {
+	return dto.TransactionResponse{
+		TransactionId:   t.TransactionId,
+		AccountId:       t.AccountId,
+		Amount:          t.Amount,
+		TransactionType: t.TransactionType,
+		TransactionDate: t.TransactionDate,
 	}
 }
